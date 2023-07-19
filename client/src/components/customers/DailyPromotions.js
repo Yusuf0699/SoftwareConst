@@ -160,30 +160,24 @@ const DailyPromotions = () => {
   //     console.log('Failed to create order:', error);
   //   }
   // };
-  const EarnReward = async (itemPromotion) => {
-    try {
-      // Check if the customer has enough reward points
-      if (customer.rewards >= itemPromotion.discount) {
-        const itemIds = itemPromotion.items.map((item) => item._id);
-        const quantityno = Array(itemPromotion.items.length).fill(1); // Create an array of length equal to the number of items and fill it with 1
-        const orderData = {
-          customerId: customer.idc,
-          itemIds: itemIds,
-          quantityno: quantityno,
-        };
-        // Decrement the customer's reward points
-        const updatedRewardPoints = customer.rewards - itemPromotion.discount;
-        // Assuming you have a separate API endpoint to update the customer's reward points
-        await axios.patch(`/api/customers/${customer.idc}`, { rewardPoints: updatedRewardPoints });
+ const checkRewardPoints = (customerRewards, requiredPoints) => {
+    return customerRewards >= requiredPoints;
+  };
   
-        const response = await axios.post('/api/orders/createorder', orderData);
-        alert('Rewards Earned! Check Your Orders');
-        window.location.href = '/cview';
-      } else {
-        alert('Insufficient reward points. You do not have enough points to attain this promotion.');
-      }
+  const createOrder = async (customerId, itemPromotion) => {
+    try {
+      const itemIds = itemPromotion.items.map((item) => item._id);
+      const quantityno = Array(itemPromotion.items.length).fill(1); // Create an array of length equal to the number of items and fill it with 1
+  
+      const orderData = {
+        customerId: customerId,
+        itemIds: itemIds,
+        quantityno: quantityno,
+      };
+  
+      await axios.post('/api/orders/createorder', orderData);
     } catch (error) {
-      console.log('Failed to create order:', error);
+      throw new Error('Failed to create the order.');
     }
   };
   return (
